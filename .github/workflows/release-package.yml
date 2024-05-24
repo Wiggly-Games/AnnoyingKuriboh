@@ -1,4 +1,4 @@
-name: Release Package
+name: Deploy
 
 on:
   workflow_dispatch:
@@ -22,7 +22,3 @@ jobs:
         env: 
           NODE_AUTH_TOKEN: ${{secrets.PACKAGE_TOKEN}}
       - run: npm run compile
-      - run: npm publish
-        working-directory: ./build
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}

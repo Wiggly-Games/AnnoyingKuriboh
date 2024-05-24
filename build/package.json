@@ -2,10 +2,10 @@
     "name": "@wiggly-games/template",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
-    "types": "index.d.ts",
+    "main": "src/index.js",
+    "types": "src/index.d.ts",
     "scripts": {
-      "start": "node main.js",
+      "start": "node src/index.js",
       "test": "node test.js"
     },
     "author": "",

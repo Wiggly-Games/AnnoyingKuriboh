@@ -1,6 +1,6 @@
 import { ApplicationCommand, CommandInteraction } from "discord.js";
 
 export interface ICommand {
-    Data: ApplicationCommand;
-    Execute(interaction: CommandInteraction): Promise<void>;
+    data: ApplicationCommand | Object;
+    execute(interaction: CommandInteraction): Promise<void>;
 }

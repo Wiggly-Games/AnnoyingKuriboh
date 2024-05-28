@@ -1,11 +1,11 @@
 import { MarkovChain } from "@wiggly-games/markov-chains"
-import { IChainUser } from "../interfaces";
 import { Server } from "./Server";
 import { WriteLog, SetOutputPath } from "@wiggly-games/logs";
 import * as TrainingData from "../TestData/WeirdAl.json"
 import { CreateDirectory, ROOT } from "@wiggly-games/files";
 import { Discord } from "./Discord";
-import { GetStaticData } from "./Helpers";
+import { GetStaticData, Utilities } from "./Helpers";
+import { IChainUser } from "./Interfaces";
 require('dotenv').config()
 
 const users : IChainUser[] = [
@@ -24,9 +24,11 @@ const Data = `${ROOT}\\Data`;
   SetOutputPath(Logs);
 
   const chain = new MarkovChain();
+  const utilities = new Utilities(chain);
+
   await WriteLog("Main", "Training Chain");
   await chain.Train(TrainingData.join("\n"), GetStaticData());
   
   await WriteLog("Main", "Setting up chain users");
-  await Promise.all(users.map(x => x.Initialize(chain)));
+  await Promise.all(users.map(x => x.Initialize(utilities)));
 })();

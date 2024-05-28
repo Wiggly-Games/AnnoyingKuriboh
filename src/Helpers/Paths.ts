@@ -8,5 +8,5 @@ export function GetStaticData(name?: string | undefined) {
         name = "Data";
     }
 
-    return Static + name;
+    return `${Static}\\${name}`;
 }

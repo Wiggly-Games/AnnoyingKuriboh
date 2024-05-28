@@ -7,8 +7,8 @@ const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	Definition: {
-		name: 'ping',
-		description: 'Says hello with a message.',
+		name: 'test',
+		description: 'Tests generating a new message.',
 		"integration_types": [ 0, 1 ],
 		"contexts": [ 0, 1, 2 ]
 	},

@@ -1,8 +1,34 @@
+/*
+    Updates server configuration for Discord:
+        - Cooldown between when it will send messages
+        - Data set that commands get generated from
+*/
+
 import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
-import { GetDataSet } from "../../Helpers";
 import { IUtilities } from "../../Interfaces";
-const { SlashCommandBuilder } = require('discord.js');
 import { MinCooldown } from "../../Configuration.json"
+
+// Sets the cooldown used in the server.
+async function SetCooldown(interaction, utilities: IUtilities) {
+    const guildId = interaction.guildId;
+    const cooldown = interaction.options.getNumber("seconds");
+
+    console.log(`Set ${guildId} cooldown to ${cooldown}`);
+    await utilities.Database.SetCooldown(guildId, cooldown);
+
+    interaction.editReply(`Server cooldown has been updated to ${cooldown} seconds.`)
+}
+
+// Sets the Data Set used by a user.
+async function SetDataSet(interaction, utilities: IUtilities) {
+    const userId = interaction.user.id;
+    const dataSetName = interaction.options.getString("name");
+
+    console.log(`Set ${userId} data set to ${dataSetName}`);
+    await utilities.Database.ChangeDataSet(userId, dataSetName);
+
+    interaction.editReply(`You are now generating responses from the ${dataSetName} data set.`);
+}
 
 module.exports = {
 	Definition: {
@@ -50,10 +76,13 @@ module.exports = {
             }
         ]
 	},
-	async Execute(interaction: CommandInteraction, utilities: IUtilities) {
-		await interaction.deferReply();
-
-        await interaction.editReply("Ah, I see you.");
-        console.log(interaction);
+	async Execute(interaction, utilities: IUtilities) {
+		await interaction.deferReply({ephemeral: true});
+        switch (interaction.options.getSubcommand()) {
+            case "dataset":
+                return SetDataSet(interaction, utilities);
+            case "cooldown":
+                return SetCooldown(interaction, utilities);
+        }
 	}
 }

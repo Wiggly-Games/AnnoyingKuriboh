@@ -15,10 +15,9 @@ module.exports = {
 	async Execute(interaction: CommandInteraction, utilities: IUtilities) {
 		await interaction.deferReply();
 
-		//const dataset = await utilities.Database.GetConfiguration([interaction.guildId, interaction.user?.id]);
-		
-		const dataset = "WeirdAl";
+		const dataset = await utilities.Database.GetDataSet(interaction.user.id);
 		const response = await utilities.Chain.Generate(GetDataSet(dataset));
+		
 		await interaction.editReply(response);
 	}
 }

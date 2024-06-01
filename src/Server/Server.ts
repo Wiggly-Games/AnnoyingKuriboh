@@ -15,7 +15,7 @@ export async function Initialize(utilities: IUtilities) {
         res.send('Hello World!')
     })
     app.get('/generate', async (req, res) => {
-        res.send(await utilities.Chain.Generate(GetStaticData()))
+        res.send(await utilities.Chain.Generate(GetStaticData('WeirdAl')))
     })
     
     app.listen(port, () => {

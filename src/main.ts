@@ -27,7 +27,7 @@ const Data = `${ROOT}\\Data`;
   const utilities = new Utilities(chain);
 
   await WriteLog("Main", "Training Chain");
-  await chain.Train(TrainingData.join("\n"), GetStaticData());
+  await chain.Train(TrainingData.join("\n"), GetStaticData("WeirdAl"));
   
   await WriteLog("Main", "Setting up chain users");
   await Promise.all(users.map(x => x.Initialize(utilities)));

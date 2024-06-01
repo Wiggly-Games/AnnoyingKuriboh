@@ -15,7 +15,7 @@ module.exports = {
 	async Execute(interaction: CommandInteraction, utilities: IUtilities) {
 		await interaction.deferReply();
 
-		const response = await utilities.Chain.Generate(GetStaticData());
+		const response = await utilities.Chain.Generate(GetStaticData('WeirdAl'));
 		await interaction.editReply(response);
 	}
 }

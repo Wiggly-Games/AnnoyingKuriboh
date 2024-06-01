@@ -93,7 +93,7 @@ export async function Initialize(utilities: IUtilities){
     // Respond to messages being generated
     client.on("messageCreate", async function(message) {
         if (message.mentions.users.has(client.user.id) || message.content.indexOf("meow irl") !== -1) {
-            message.reply(await utilities.Chain.Generate(GetStaticData()));
+            message.reply(await utilities.Chain.Generate(GetStaticData('WeirdAl')));
         }
     });
       

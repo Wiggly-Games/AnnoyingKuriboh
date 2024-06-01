@@ -1,9 +1,41 @@
-import { ApplicationCommand, ApplicationCommandOptionType, CommandInteraction } from "discord.js";
-import { MarkovChain } from "@wiggly-games/markov-chains";
-import { ICommand } from "../Interfaces/IUtilityCommand";
-import { GetDataSet } from "../../Helpers";
+/*
+    This command is responsible for setting up and removing Trigger Phrases,
+    which will activate the bot when a user sends a message containing that phrase.
+*/
+
+import { ApplicationCommandOptionType } from "discord.js";
 import { IUtilities } from "../../Interfaces";
-const { SlashCommandBuilder } = require('discord.js');
+
+// Adds a trigger phrase to a server.
+async function Add(interaction, utilities: IUtilities) {
+    const phrase = interaction.options.getString("phrase");
+    const loweredPhrase = phrase.toLowerCase();
+    
+    try {
+        await utilities.Database.AddTriggerWord(interaction.guildId, loweredPhrase);
+        await interaction.editReply(`New trigger phrase "${phrase}" added.`)
+    } catch {
+        await interaction.editReply("Failed to add phrase, it is likely already being listened for.");
+    }
+}
+
+// Removes a trigger phrase from a server.
+async function Remove(interaction, utilities: IUtilities) {
+    const phrase = interaction.options.getString("phrase");
+    const loweredPhrase = phrase.toLowerCase();
+    
+    const valid = await utilities.Database.RemoveTriggerWord(interaction.guildId, loweredPhrase);
+    await interaction.editReply(valid ? `Trigger phrase "${phrase}" removed` : `Could not find trigger phrase "${phrase}", please double check.`);
+}
+
+// Retrieves the list of phrases that the server is listening on, and presents them to the user.
+async function Get(interaction, utilities: IUtilities) {
+    const phrases = await utilities.Database.GetTriggerWords(interaction.guildId);
+    const joined = phrases.map((phrase, index) => `${index + 1}. \`${phrase.replace(/\n/g, "\\n")}\``).join("\n");
+    console.log(joined);
+
+    await interaction.editReply("The interactions being listened for in this server are:\n" + joined);
+}
 
 module.exports = {
 	Definition: {
@@ -37,13 +69,26 @@ module.exports = {
                         required: true
                     }
                 ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "get",
+                description: "Retrieves a list of all phrases that are currently being listened for.",
             }
         ]
 	},
-	async Execute(interaction: CommandInteraction, utilities: IUtilities) {
-		await interaction.deferReply();
-        console.log(interaction);
-
-        await interaction.editReply("I see.");
+	async Execute(interaction, utilities: IUtilities) {
+		await interaction.deferReply({ephemeral: true});
+        switch (interaction.options.getSubcommand()){
+            case "add":
+                Add(interaction, utilities);
+                break;
+            case "remove":
+                Remove(interaction, utilities);
+                break;
+            case "get":
+                Get(interaction, utilities);
+                break;
+        }
 	}
 }

@@ -1,12 +1,20 @@
-import { ROOT } from "@wiggly-games/files";
+import { CreateDirectory, ROOT } from "@wiggly-games/files";
 
-export const CommandFiles = ROOT + "\\src\\Discord\\Commands\\Utility";
-export const Static = ROOT + "\\Static";
+export const Paths = {
+    Commands: ROOT + "/src/Discord/Commands",
+    Static: ROOT + "/Static",
+    Logs: `${ROOT}/Logs`,
+    Data: `${ROOT}/Data`
+}
 
-export function GetStaticData(name?: string | undefined) {
-    if (!name) {
-        name = "Data";
+// Sets up directories to make sure they exist.
+export async function Initialize(){
+    for (const path of Object.values(Paths)) {
+        await CreateDirectory(path);
     }
+}
 
-    return `${Static}\\${name}`;
+// Returns a data set with the given name.
+export function GetDataSet(name: string) {
+    return `${Paths.Data}\\${name}`;
 }

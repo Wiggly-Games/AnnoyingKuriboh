@@ -3,7 +3,7 @@ import { Client, GatewayIntentBits, Collection } from 'discord.js';
 import { MarkovChain } from "@wiggly-games/markov-chains";
 import * as Files from "@wiggly-games/files";
 import { ICommand } from "./Interfaces";
-import { CommandFiles, GetStaticData } from "../Helpers";
+import { Paths, GetDataSet } from "../Helpers";
 import { IUtilities } from "../Interfaces";
 import { Deploy } from "./Deploy";
 
@@ -21,7 +21,7 @@ declare module "discord.js" {
 async function GetCommands(): Promise<ICommand[]> {
   const commands = [ ];
 
-  const commandFiles = await Files.GetDescendants(CommandFiles, file => file.endsWith(".js"));
+  const commandFiles = await Files.GetDescendants(Paths.Commands, file => file.endsWith(".js"));
   commandFiles.forEach(commandPath => {
     const command = require(commandPath);
     
@@ -93,7 +93,7 @@ export async function Initialize(utilities: IUtilities){
     // Respond to messages being generated
     client.on("messageCreate", async function(message) {
         if (message.mentions.users.has(client.user.id) || message.content.indexOf("meow irl") !== -1) {
-            message.reply(await utilities.Chain.Generate(GetStaticData('WeirdAl')));
+            message.reply(await utilities.Chain.Generate(GetDataSet('WeirdAl')));
         }
     });
       

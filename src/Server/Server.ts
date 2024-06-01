@@ -1,5 +1,5 @@
 import { MarkovChain } from "@wiggly-games/markov-chains";
-import { GetStaticData } from "../Helpers";
+import { GetDataSet } from "../Helpers";
 import { IUtilities } from "../Interfaces";
 const express = require("express");
 
@@ -15,7 +15,7 @@ export async function Initialize(utilities: IUtilities) {
         res.send('Hello World!')
     })
     app.get('/generate', async (req, res) => {
-        res.send(await utilities.Chain.Generate(GetStaticData('WeirdAl')))
+        res.send(await utilities.Chain.Generate(GetDataSet('WeirdAl')))
     })
     
     app.listen(port, () => {

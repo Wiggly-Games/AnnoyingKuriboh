@@ -1,8 +1,8 @@
 import { ApplicationCommand, CommandInteraction } from "discord.js";
 import { MarkovChain } from "@wiggly-games/markov-chains";
-import { ICommand } from "../../Interfaces/IUtilityCommand";
-import { GetStaticData } from "../../../Helpers";
-import { IUtilities } from "../../../Interfaces";
+import { ICommand } from "../Interfaces/IUtilityCommand";
+import { GetDataSet } from "../../Helpers";
+import { IUtilities } from "../../Interfaces";
 const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
@@ -15,7 +15,7 @@ module.exports = {
 	async Execute(interaction: CommandInteraction, utilities: IUtilities) {
 		await interaction.deferReply();
 
-		const response = await utilities.Chain.Generate(GetStaticData('WeirdAl'));
+		const response = await utilities.Chain.Generate(GetDataSet('WeirdAl'));
 		await interaction.editReply(response);
 	}
 }

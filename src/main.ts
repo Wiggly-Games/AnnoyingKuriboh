@@ -5,6 +5,7 @@ import * as TrainingData from "../TestData/WeirdAl.json"
 import { Discord } from "./Discord";
 import { GetDataSet, Utilities, Paths, Initialize as InitializePaths } from "./Helpers";
 import { IChainUser } from "./Interfaces";
+import { Database } from "./Database";
 require('dotenv').config();
 
 const users: IChainUser[] = [
@@ -17,7 +18,8 @@ const users: IChainUser[] = [
   SetOutputPath(Paths.Logs);
 
   const chain = new MarkovChain();
-  const utilities = new Utilities(chain);
+  const database = new Database(Paths.Database);
+  const utilities = new Utilities(chain, database);
 
   await WriteLog("Main", "Training Chain");
   await chain.Train(TrainingData.join("\n"), GetDataSet("WeirdAl"));

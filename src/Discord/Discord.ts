@@ -1,4 +1,4 @@
-import { Partials, REST, Routes } from "discord.js"
+import { BaseInteraction, Partials, REST, Routes } from "discord.js"
 import { Client, GatewayIntentBits, Collection } from 'discord.js';
 import { MarkovChain } from "@wiggly-games/markov-chains";
 import * as Files from "@wiggly-games/files";
@@ -6,17 +6,10 @@ import { ICommand } from "./Interfaces";
 import { Paths, GetDataSet } from "../Helpers";
 import { IUtilities } from "../Interfaces";
 import { Deploy } from "./Deploy";
+import { TDiscordId } from "../Types";
+require("./Extensions");
 
 // Add the commands to discord.js
-declare module "discord.js" {
-  interface Client {
-    commands: Collection<string, ICommand>;
-  }
-  interface ApplicationCommand {
-    integration_types: number[];
-  }
-}
-
 // Fetches and loads all commands from the Commands folder.
 async function GetCommands(): Promise<ICommand[]> {
   const commands = [ ];

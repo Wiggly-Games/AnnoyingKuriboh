@@ -4,7 +4,8 @@ export const Paths = {
     Commands: ROOT + "/src/Discord/Commands",
     Static: ROOT + "/Static",
     Logs: `${ROOT}/Logs`,
-    Data: `${ROOT}/Data`
+    Data: `${ROOT}/Data`,
+    Database: `${ROOT}/Database`
 }
 
 // Sets up directories to make sure they exist.

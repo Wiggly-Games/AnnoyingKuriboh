@@ -2,11 +2,12 @@
     Interface for the Database, used to store configuration data for servers/users.
 */
 
-import { TDataConfig, TDiscordId } from "../Types";
+import { TDiscordId } from "../Types";
 
 export interface IDatabase {
     GetTriggerWords(serverId: TDiscordId): Promise<string[]>;
-    GetConfiguration(sourceIds): Promise<TDataConfig[]>;
+    GetCooldown(serverId: TDiscordId): Promise<number>;
+    GetDataSet(userId: TDiscordId): Promise<string>;
 
     AddTriggerWord(sourceId: TDiscordId, word: string): Promise<void>;
     RemoveTriggerWord(sourceId: TDiscordId, word: string): Promise<boolean>;

@@ -5,7 +5,6 @@
 import {Knex, default as Connect} from "knex";
 import { IDatabase } from "../Interfaces/IDatabase";
 import { Defaults } from "../Configuration.json";
-import { TDataConfig } from "../Types/TDataConfig";
 
 export class Database implements IDatabase {
     _database: Knex;
@@ -32,8 +31,15 @@ export class Database implements IDatabase {
     }
 
     // Retrieves the Configuration (DataSet, Cooldown) for a server/user.
-    async GetConfiguration(sourceIds: string[]): Promise<TDataConfig[]> {
-        return await this._database("Configuration").whereIn("SourceId", sourceIds);
+    async GetCooldown(serverId: string): Promise<number> {
+        const response = await this._database("Cooldowns").where("ServerId", serverId);
+        return response.length === 0 ? Defaults.Cooldown : response[0].Cooldown;
+    }
+
+    // Retrieves the Data Set that a user is using.
+    async GetDataSet(userId: string): Promise<string> {
+        const response = await this._database("DataSets").where("UserId", userId);
+        return response.length === 0 ? Defaults.DataSet : response[0].DataSet;
     }
 
     // Adds a new trigger word to a server.
@@ -54,41 +60,42 @@ export class Database implements IDatabase {
     }
 
     // Changes the active data set being used by a server/user.
-    async ChangeDataSet(sourceId: string, dataset: string): Promise<any> {
-        await this._database("Configuration").insert({
-            SourceId: sourceId,
+    async ChangeDataSet(userId: string, dataset: string): Promise<any> {
+        await this._database("DataSets").insert({
+            UserId: userId,
             DataSet: dataset
-        }).onConflict("SourceId").merge();
+        }).onConflict("UserId").merge();
     }
 
     // Changes the cooldown for a user/server.
-    async SetCooldown(sourceId: string, cooldown: number): Promise<void> {
-        await this._database("Configuration").insert({
-            SourceId: sourceId,
+    async SetCooldown(serverId: string, cooldown: number): Promise<void> {
+        await this._database("Cooldowns").insert({
+            ServerId: serverId,
             Cooldown: cooldown
-        }).onConflict("SourceId").merge();
+        }).onConflict("ServerId").merge();
     }
 
     // Initializes the database, creating any tables that are needed.
     async Initialize(){
-        // Create the Trigger Words table
         await this.CreateTableIfNotExists("TriggerWords", (table) => {
             table.string("SourceId");
             table.string("TriggerWord");
             table.primary(["SourceId", "TriggerWord"]);
         });
-
-        // Create the Configuration table
-        await this.CreateTableIfNotExists("Configuration", (table) => {
-            table.string("SourceId").primary();
-            table.string("DataSet").defaultTo(Defaults.DataSet);
+        await this.CreateTableIfNotExists("Cooldowns", (table) => {
+            table.string("ServerId").primary();
             table.integer("Cooldown").defaultTo(Defaults.Cooldown);
+        });
+        await this.CreateTableIfNotExists("DataSets", (table) => {
+            table.string("UserId").primary();
+            table.string("DataSet").defaultTo(Defaults.DataSet);
         });
     }
 
     // Creates a table if it doesn't already exist.
     private async CreateTableIfNotExists(tableName: string, configure: (table: Knex.TableBuilder)=>any): Promise<void> {
-        const hasTable = this._database.schema.hasTable(tableName);
+        const hasTable = await this._database.schema.hasTable(tableName);
+        console.log(`Has Table ${tableName}: ${hasTable}`)
         if (hasTable) {
             return;
         }

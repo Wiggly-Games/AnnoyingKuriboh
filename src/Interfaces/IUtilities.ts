@@ -7,7 +7,9 @@
 */
 
 import { MarkovChain } from "@wiggly-games/markov-chains";
+import { IDatabase } from "./IDatabase";
 
 export interface IUtilities {
     get Chain(): MarkovChain;
+    get Database(): IDatabase;
 }

@@ -20,7 +20,7 @@ async function Add(interaction, utilities: IUtilities) {
         });
         await interaction.editReply(`New trigger phrase "${phrase}" added.`)
     } catch {
-        await interaction.editReply("Failed to add phrase, it is likely already being listened for.");
+        await interaction.editReply(`Failed to add new phrase "${phrase}". Please check if it is already contained within the list.`);
     }
 }
 

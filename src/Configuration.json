@@ -1,6 +1,6 @@
 {
     "Defaults": {
-        "Cooldown": 5000,
+        "Cooldown": 5,
         "DataSet": "WeirdAl"
     },
     "MinCooldown": 2

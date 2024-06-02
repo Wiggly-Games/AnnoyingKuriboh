@@ -19,7 +19,7 @@ export class Database implements IDatabase {
         });
         this._database = knex;
     }
-    
+
     // Disconnects from the database, cleaning up memory use.
     // The database should never be used again after this is called (a new one should be connected instead).
     async Disconnect(): Promise<void> {
@@ -28,7 +28,7 @@ export class Database implements IDatabase {
 
     // Retrieves all Trigger Words for a server.
     async GetTriggerWords(serverId: string): Promise<TTrigger[]> {
-        const response = await this._database("TriggerWords").select("TriggerWord").where("SourceId", serverId);
+        const response = await this._database("TriggerWords").select(["TriggerWord", "ExtraText"]).where("SourceId", serverId);
         return response.map(data => {
             return {
                 TriggerWord: data.TriggerWord,
@@ -118,7 +118,6 @@ export class Database implements IDatabase {
     // Creates a table if it doesn't already exist.
     private async CreateTableIfNotExists(tableName: string, configure: (table: Knex.TableBuilder)=>any): Promise<void> {
         const hasTable = await this._database.schema.hasTable(tableName);
-        console.log(`Has Table ${tableName}: ${hasTable}`)
         if (hasTable) {
             return;
         }

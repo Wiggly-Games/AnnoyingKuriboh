@@ -37,12 +37,12 @@ async function Remove(interaction, utilities: IUtilities) {
 async function Get(interaction, utilities: IUtilities) {
     const phrases = await utilities.Database.GetTriggerWords(interaction.guildId);
     const joined = phrases.map((phrase, index) => `${index + 1}. \`${phrase.TriggerWord.replace(/\n/g, "\\n")}\``).join("\n");
-    console.log(joined);
 
     await interaction.editReply("The interactions being listened for in this server are:\n" + joined);
 }
 
 module.exports = {
+    Private: true,
 	Definition: {
 		name: 'triggers',
 		description: 'Updates trigger words or phrases that will generate bot responses.',
@@ -89,7 +89,6 @@ module.exports = {
         ]
 	},
 	async Execute(interaction, utilities: IUtilities) {
-		await interaction.deferReply({ephemeral: true});
         switch (interaction.options.getSubcommand()){
             case "add":
                 Add(interaction, utilities);

@@ -13,9 +13,7 @@ async function SetCooldown(interaction, utilities: IUtilities) {
     const guildId = interaction.guildId;
     const cooldown = interaction.options.getNumber("seconds");
 
-    console.log(`Set ${guildId} cooldown to ${cooldown}`);
     await utilities.Database.SetCooldown(guildId, cooldown);
-
     interaction.editReply(`Server cooldown has been updated to ${cooldown} seconds.`)
 }
 
@@ -24,13 +22,13 @@ async function SetDataSet(interaction, utilities: IUtilities) {
     const userId = interaction.user.id;
     const dataSetName = interaction.options.getString("name");
 
-    console.log(`Set ${userId} data set to ${dataSetName}`);
     await utilities.Database.ChangeDataSet(userId, dataSetName);
 
     interaction.editReply(`You are now generating responses from the ${dataSetName} data set.`);
 }
 
 module.exports = {
+    Private: true,
 	Definition: {
 		name: 'configure',
 		description: 'Configures the Annoying Kuriboh bot.',
@@ -79,7 +77,6 @@ module.exports = {
         ]
 	},
 	async Execute(interaction, utilities: IUtilities) {
-		await interaction.deferReply({ephemeral: true});
         switch (interaction.options.getSubcommand()) {
             case "dataset":
                 return SetDataSet(interaction, utilities);

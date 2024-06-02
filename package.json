@@ -20,6 +20,7 @@
     "@types/node": "^20.12.12"
   },
   "dependencies": {
+    "@wiggly-games/data-structures": "^1.0.2",
     "@wiggly-games/files": "^1.0.3",
     "@wiggly-games/logs": "^1.0.1",
     "@wiggly-games/markov-chains": "^2.1.3",

@@ -5,7 +5,7 @@
 import {Knex, default as Connect} from "knex";
 import { IDatabase } from "../Interfaces/IDatabase";
 import { Defaults } from "../Configuration.json";
-import { TTrigger } from "../Types";
+import { TCooldown, TTrigger } from "../Types";
 
 export class Database implements IDatabase {
     _database: Knex;
@@ -38,9 +38,16 @@ export class Database implements IDatabase {
     }
 
     // Retrieves the Configuration (DataSet, Cooldown) for a server/user.
-    async GetCooldown(serverId: string): Promise<number> {
+    async GetCooldown(serverId: string): Promise<TCooldown> {
         const response = await this._database("Cooldowns").where("ServerId", serverId);
-        return response.length === 0 ? Defaults.Cooldown : response[0].Cooldown;
+        const hasData = response.length > 0;
+        const lastMessageTimestamp = hasData ? response[0].LastMessage : 0;
+        const cooldown = hasData ? response[0].Cooldown : Defaults.Cooldown;
+
+        return {
+            LastMessageTimestamp: lastMessageTimestamp,
+            Cooldown: cooldown
+        }
     }
 
     // Retrieves the Data Set that a user is using.
@@ -84,17 +91,11 @@ export class Database implements IDatabase {
     }
 
     // Updates the time that a message was last sent to the server.
-    async SetMessageTime(serverId: string, time: number): Promise<void> {
+    async SetLastMessageTimestamp(serverId: string, time: number): Promise<void> {
         await this._database("Cooldowns").insert({
             ServerId: serverId,
             LastMessage: time
         }).onConflict("ServerId").merge();
-    }
-
-    // Gets the time that a message was last sent to the server.
-    async GetMessageTime(serverId: string): Promise<number> {
-        const response = await this._database("Cooldowns").where("ServerId", serverId);
-        return response.length === 0 ? 0 : response[0].LastMessage;
     }
 
     // Initializes the database, creating any tables that are needed.
@@ -108,6 +109,7 @@ export class Database implements IDatabase {
         await this.CreateTableIfNotExists("Cooldowns", (table) => {
             table.string("ServerId").primary();
             table.integer("Cooldown").defaultTo(Defaults.Cooldown);
+            table.integer("LastMessage").defaultTo(0);
         });
         await this.CreateTableIfNotExists("DataSets", (table) => {
             table.string("UserId").primary();

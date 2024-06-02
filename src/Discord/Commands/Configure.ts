@@ -64,6 +64,8 @@ module.exports = {
                 type: ApplicationCommandOptionType.Subcommand,
                 name: "cooldown",
                 description: "Sets how long the cooldown should be between the bot generating responses.",
+                "default_member_permissions": 0,
+                "integration_types": [ 0 ],
                 options: [
                     {
                         type: ApplicationCommandOptionType.Number,

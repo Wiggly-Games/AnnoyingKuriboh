@@ -43,6 +43,7 @@ module.exports = {
 		description: 'Updates trigger words or phrases that will generate bot responses.',
 		"integration_types": [ 0 ],
 		"contexts": [ 0 ],
+        "default_member_permissions": 0,
         "options": [
             {
                 type: ApplicationCommandOptionType.Subcommand,

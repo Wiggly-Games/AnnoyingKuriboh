@@ -13,15 +13,4 @@ declare module "discord.js" {
     interface ApplicationCommand {
         integration_types: number[];
     }
-    interface BaseInteraction {
-        GetSenderId(): TDiscordId;
-    }
-}
-
-// Implement GetSenderId
-BaseInteraction.prototype.GetSenderId = function(){
-    const guildId = this.guildId;
-    const userId = this.user?.id;
-
-    return this.inGuild() ? guildId : userId;
 }

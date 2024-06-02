@@ -1,4 +1,4 @@
-import { Partials } from "discord.js"
+import { Colors, Partials } from "discord.js"
 import { Client, GatewayIntentBits, Collection } from 'discord.js';
 import * as Files from "@wiggly-games/files";
 import { ICommand } from "./Interfaces";
@@ -96,18 +96,32 @@ export async function Initialize(utilities: IUtilities){
         return;
       }
 
+      // go through all the triggers to see if any of them match
       const triggers = await utilities.Database.GetTriggerWords(guildId);
-      triggers.forEach(trigger => {
+      for (const trigger of triggers) {
         if (message.content.toLowerCase().includes(trigger.TriggerWord)) {
+          // if we found one, add it to our queue to respond to
           CommandsQueue.Add(async () => {
+            // Check cooldown
+            const currentTime = new Date().getTime();
+            const lastTime = await utilities.Database.GetCooldown(guildId);
+            
+            if (lastTime.LastMessageTimestamp + lastTime.Cooldown*1000 >= currentTime) {
+              return;
+            }
+            await utilities.Database.SetLastMessageTimestamp(guildId, currentTime);
+
+            // Generate a new message
             const dataSet = await utilities.Database.GetDataSet(message.author.id);
             const response = await utilities.Chain.Generate(GetDataSet(dataSet));
-
-            message.reply(response + " " + trigger.ExtraText);
+            const extraText = trigger.ExtraText || "";
+            message.reply(response + " " + extraText);
           });
-          return;
+
+          // break out here, so that we don't respond to multiple strings in one message
+          break;
         }
-      });
+      }
     });
       
     client.login(process.env.DISCORD_TOKEN);

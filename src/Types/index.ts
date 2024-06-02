@@ -1,2 +1,2 @@
 export * from "./TDiscordId";
-export * from "./TDataConfig";
+export * from "./TTrigger";

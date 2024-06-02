@@ -1,5 +1,3 @@
-import { TDataConfig } from "../Types";
-
 /*
     Extensions for Knex, providing us with better autocompletes.
 */
@@ -9,11 +7,26 @@ declare module 'knex/types/tables' {
     interface TriggerWords {
         SourceId: string;
         TriggerWord: string;
+        ExtraText: string;
+    }
+
+    // Table for storing server -> cooldown time.
+    interface Cooldowns {
+        ServerId: string;
+        Cooldown: number;
+        LastMessage: number;
+    }
+
+    // Table for storing user -> Data Set.
+    interface DataSets {
+        UserId: string;
+        DataSet: string;
     }
 
     // The tables we have access to
     interface Tables {
-        Configuration: TDataConfig;
+        Cooldowns: Cooldowns;
+        DataSets: DataSets;
         TriggerWords: TriggerWords;
     }
 }

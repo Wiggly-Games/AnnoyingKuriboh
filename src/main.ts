@@ -19,7 +19,10 @@ const users: IChainUser[] = [
 
   const chain = new MarkovChain();
   const database = new Database(Paths.Database);
+  await database.Initialize();
+  
   const utilities = new Utilities(chain, database);
+
 
   await WriteLog("Main", "Training Chain");
   await chain.Train(TrainingData.join("\n"), GetDataSet("WeirdAl"));

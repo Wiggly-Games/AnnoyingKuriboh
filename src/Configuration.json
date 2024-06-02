@@ -1,7 +1,7 @@
 {
     "Defaults": {
-        "Cooldown": 5,
+        "Cooldown": 2,
         "DataSet": "WeirdAl"
     },
-    "MinCooldown": 2
+    "MinCooldown": 0
 }

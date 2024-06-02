@@ -7,6 +7,7 @@ const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	Private: false,
+	Active: true,
 	Definition: {
 		name: 'test',
 		description: 'Tests generating a new message.',

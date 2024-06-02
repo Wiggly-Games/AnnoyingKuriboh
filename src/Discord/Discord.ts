@@ -40,7 +40,7 @@ async function LoadCommands(client: Client){
 // Deploys commands to our bot.
 export async function DeployCommands(){
   const commands = await GetCommands();
-  Deploy(commands.map(command => command.Definition));
+  Deploy(commands.filter(command => command.Active !== false).map(command => command.Definition));
 }
 
 // Initializes the Discord bot.

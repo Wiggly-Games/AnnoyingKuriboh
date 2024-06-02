@@ -43,6 +43,7 @@ async function Get(interaction, utilities: IUtilities) {
 
 module.exports = {
     Private: true,
+    Active: true,
 	Definition: {
 		name: 'triggers',
 		description: 'Updates trigger words or phrases that will generate bot responses.',

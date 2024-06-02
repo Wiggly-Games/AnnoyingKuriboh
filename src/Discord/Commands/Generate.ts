@@ -9,8 +9,8 @@ module.exports = {
 	Private: false,
 	Active: true,
 	Definition: {
-		name: 'test',
-		description: 'Tests generating a new message.',
+		name: 'generate',
+		description: 'Generates a new message.',
 		"integration_types": [ 0, 1 ],
 		"contexts": [ 0, 1, 2 ]
 	},

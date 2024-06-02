@@ -5,6 +5,7 @@
 import {Knex, default as Connect} from "knex";
 import { IDatabase } from "../Interfaces/IDatabase";
 import { Defaults } from "../Configuration.json";
+import { TTrigger } from "../Types";
 
 export class Database implements IDatabase {
     _database: Knex;
@@ -18,6 +19,7 @@ export class Database implements IDatabase {
         });
         this._database = knex;
     }
+    
     // Disconnects from the database, cleaning up memory use.
     // The database should never be used again after this is called (a new one should be connected instead).
     async Disconnect(): Promise<void> {
@@ -25,9 +27,14 @@ export class Database implements IDatabase {
     }
 
     // Retrieves all Trigger Words for a server.
-    async GetTriggerWords(serverId: string): Promise<string[]> {
+    async GetTriggerWords(serverId: string): Promise<TTrigger[]> {
         const response = await this._database("TriggerWords").select("TriggerWord").where("SourceId", serverId);
-        return response.map(data => data.TriggerWord);
+        return response.map(data => {
+            return {
+                TriggerWord: data.TriggerWord,
+                ExtraText: data.ExtraText
+            }
+        });
     }
 
     // Retrieves the Configuration (DataSet, Cooldown) for a server/user.
@@ -43,10 +50,11 @@ export class Database implements IDatabase {
     }
 
     // Adds a new trigger word to a server.
-    async AddTriggerWord(sourceId: string, word: string): Promise<void> {
+    async AddTriggerWord(sourceId: string, trigger: TTrigger): Promise<void> {
         await this._database("TriggerWords").insert({
             SourceId: sourceId,
-            TriggerWord: word
+            TriggerWord: trigger.TriggerWord,
+            ExtraText: trigger.ExtraText
         });
     }
 
@@ -75,11 +83,26 @@ export class Database implements IDatabase {
         }).onConflict("ServerId").merge();
     }
 
+    // Updates the time that a message was last sent to the server.
+    async SetMessageTime(serverId: string, time: number): Promise<void> {
+        await this._database("Cooldowns").insert({
+            ServerId: serverId,
+            LastMessage: time
+        }).onConflict("ServerId").merge();
+    }
+
+    // Gets the time that a message was last sent to the server.
+    async GetMessageTime(serverId: string): Promise<number> {
+        const response = await this._database("Cooldowns").where("ServerId", serverId);
+        return response.length === 0 ? 0 : response[0].LastMessage;
+    }
+
     // Initializes the database, creating any tables that are needed.
     async Initialize(){
         await this.CreateTableIfNotExists("TriggerWords", (table) => {
             table.string("SourceId");
             table.string("TriggerWord");
+            table.string("ExtraText");
             table.primary(["SourceId", "TriggerWord"]);
         });
         await this.CreateTableIfNotExists("Cooldowns", (table) => {

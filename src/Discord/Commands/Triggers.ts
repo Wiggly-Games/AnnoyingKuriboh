@@ -10,9 +10,14 @@ import { IUtilities } from "../../Interfaces";
 async function Add(interaction, utilities: IUtilities) {
     const phrase = interaction.options.getString("phrase");
     const loweredPhrase = phrase.toLowerCase();
+
+    const extraText = interaction.options.getString("extra");
     
     try {
-        await utilities.Database.AddTriggerWord(interaction.guildId, loweredPhrase);
+        await utilities.Database.AddTriggerWord(interaction.guildId, {
+            TriggerWord: loweredPhrase, 
+            ExtraText: extraText
+        });
         await interaction.editReply(`New trigger phrase "${phrase}" added.`)
     } catch {
         await interaction.editReply("Failed to add phrase, it is likely already being listened for.");
@@ -31,7 +36,7 @@ async function Remove(interaction, utilities: IUtilities) {
 // Retrieves the list of phrases that the server is listening on, and presents them to the user.
 async function Get(interaction, utilities: IUtilities) {
     const phrases = await utilities.Database.GetTriggerWords(interaction.guildId);
-    const joined = phrases.map((phrase, index) => `${index + 1}. \`${phrase.replace(/\n/g, "\\n")}\``).join("\n");
+    const joined = phrases.map((phrase, index) => `${index + 1}. \`${phrase.TriggerWord.replace(/\n/g, "\\n")}\``).join("\n");
     console.log(joined);
 
     await interaction.editReply("The interactions being listened for in this server are:\n" + joined);
@@ -55,6 +60,11 @@ module.exports = {
                         name: "phrase",
                         description: "Enter a phrase that the bot will look for and respond to.",
                         required: true
+                    },
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "extra",
+                        description: "Extra text to append at the end of generated responses (optional)",
                     }
                 ]
             },

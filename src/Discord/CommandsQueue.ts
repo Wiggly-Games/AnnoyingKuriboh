@@ -1,4 +1,5 @@
 import { Queue } from "@wiggly-games/data-structures";
+import * as Log from "@wiggly-games/logs";
 
 const commandsQueue = new Queue<() => Promise<void>>;
 let isProcessingCommands: boolean = false;
@@ -15,7 +16,11 @@ async function RunCommands(){
     while (commandsQueue.Any()) {
       // Remove the next command, and wait for it to finish
       const command = commandsQueue.Remove();
-      await command();
+      try {
+        await command();
+      } catch (e) {
+        Log.WriteError("Discord", e.message);
+      }
     }
   
     // At this point all the commands are gone, so we're doing processing

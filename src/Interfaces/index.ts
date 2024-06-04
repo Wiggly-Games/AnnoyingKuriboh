@@ -1,2 +1,2 @@
-export * from "./IUtilities";
+export * from "./IDatabase";
 export * from "./IChainUser";

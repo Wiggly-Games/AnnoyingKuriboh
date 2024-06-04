@@ -4,17 +4,17 @@
 */
 
 import { ApplicationCommandOptionType } from "discord.js";
-import { IUtilities } from "../../Interfaces";
+import { TDependencyInjections } from "../../Types";
 
 // Adds a trigger phrase to a server.
-async function Add(interaction, utilities: IUtilities) {
+async function Add(interaction, { Database }) {
     const phrase = interaction.options.getString("phrase");
     const loweredPhrase = phrase.toLowerCase();
 
     const extraText = interaction.options.getString("extra");
     
     try {
-        await utilities.Database.AddTriggerWord(interaction.guildId, {
+        await Database.AddTriggerWord(interaction.guildId, {
             TriggerWord: loweredPhrase, 
             ExtraText: extraText
         });
@@ -25,17 +25,17 @@ async function Add(interaction, utilities: IUtilities) {
 }
 
 // Removes a trigger phrase from a server.
-async function Remove(interaction, utilities: IUtilities) {
+async function Remove(interaction, { Database }) {
     const phrase = interaction.options.getString("phrase");
     const loweredPhrase = phrase.toLowerCase();
     
-    const valid = await utilities.Database.RemoveTriggerWord(interaction.guildId, loweredPhrase);
+    const valid = await Database.RemoveTriggerWord(interaction.guildId, loweredPhrase);
     await interaction.editReply(valid ? `Trigger phrase "${phrase}" removed` : `Could not find trigger phrase "${phrase}", please double check.`);
 }
 
 // Retrieves the list of phrases that the server is listening on, and presents them to the user.
-async function Get(interaction, utilities: IUtilities) {
-    const phrases = await utilities.Database.GetTriggerWords(interaction.guildId);
+async function Get(interaction, {Database}) {
+    const phrases = await Database.GetTriggerWords(interaction.guildId);
     const joined = phrases.map((phrase, index) => `${index + 1}. \`${phrase.TriggerWord.replace(/\n/g, "\\n")}\``).join("\n");
 
     await interaction.editReply("The interactions being listened for in this server are:\n" + joined);
@@ -89,16 +89,16 @@ module.exports = {
             }
         ]
 	},
-	async Execute(interaction, utilities: IUtilities) {
+	async Execute(interaction, dependencyInjections: TDependencyInjections) {
         switch (interaction.options.getSubcommand()){
             case "add":
-                Add(interaction, utilities);
+                Add(interaction, dependencyInjections);
                 break;
             case "remove":
-                Remove(interaction, utilities);
+                Remove(interaction, dependencyInjections);
                 break;
             case "get":
-                Get(interaction, utilities);
+                Get(interaction, dependencyInjections);
                 break;
         }
 	}

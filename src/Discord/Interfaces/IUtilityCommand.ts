@@ -1,9 +1,9 @@
 import { ApplicationCommand, CommandInteraction } from "discord.js";
-import { IUtilities } from "../../Interfaces";
+import { TDependencyInjections } from "../../Types";
 
 export interface ICommand {
     Private: boolean;
     Active: boolean;
     Definition: ApplicationCommand;
-    Execute(interaction: CommandInteraction, utilities: IUtilities): Promise<void>;
+    Execute(interaction: CommandInteraction, dependencies: TDependencyInjections): Promise<void>;
 }

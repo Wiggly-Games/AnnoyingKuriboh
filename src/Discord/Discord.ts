@@ -4,9 +4,9 @@ import * as Files from "@wiggly-games/files";
 import * as Logs from "@wiggly-games/logs";
 import { ICommand } from "./Interfaces";
 import { Paths, GetDataSet } from "../Helpers";
-import { IUtilities } from "../Interfaces";
 import { Deploy } from "./Deploy";
 import * as CommandsQueue from "./CommandsQueue";
+import { TDependencyInjections } from "../Types";
 require("./Extensions");
 
 const LogName = "Discord";
@@ -59,8 +59,10 @@ async function pcall(f: ()=>Promise<void>): Promise<boolean> {
 }
 
 // Initializes the Discord bot.
-export async function Initialize(utilities: IUtilities){
-    const client = new Client({ intents: 
+export async function Initialize(dependencies: TDependencyInjections){
+  const { Chain, Database } = dependencies;
+
+  const client = new Client({ intents: 
       [GatewayIntentBits.Guilds, 
         GatewayIntentBits.DirectMessages,
         GatewayIntentBits.GuildMessages,
@@ -87,7 +89,7 @@ export async function Initialize(utilities: IUtilities){
 		  await interaction.deferReply({ephemeral: command.Private});
       CommandsQueue.Add(async () => {
         try {
-          await command.Execute(interaction, utilities);
+          await command.Execute(interaction, dependencies);
         } catch (error) {
           Logs.WriteError(LogName, error);
           await pcall(async ()=>{
@@ -114,23 +116,23 @@ export async function Initialize(utilities: IUtilities){
       }
 
       // go through all the triggers to see if any of them match
-      const triggers = await utilities.Database.GetTriggerWords(guildId);
+      const triggers = await Database.GetTriggerWords(guildId);
       for (const trigger of triggers) {
         if (message.content.toLowerCase().includes(trigger.TriggerWord)) {
           // if we found one, add it to our queue to respond to
           CommandsQueue.Add(async () => {
             // Check cooldown
             const currentTime = new Date().getTime();
-            const lastTime = await utilities.Database.GetCooldown(guildId);
+            const lastTime = await Database.GetCooldown(guildId);
             
             if (lastTime.LastMessageTimestamp + lastTime.Cooldown*1000 >= currentTime) {
               return;
             }
-            await utilities.Database.SetLastMessageTimestamp(guildId, currentTime);
+            await Database.SetLastMessageTimestamp(guildId, currentTime);
 
             // Generate a new message
-            const dataSet = await utilities.Database.GetDataSet(message.author.id);
-            const response = await utilities.Chain.Generate(GetDataSet(dataSet));
+            const dataSet = await Database.GetDataSet(message.author.id);
+            const response = await Chain.Generate(GetDataSet(dataSet));
             const extraText = trigger.ExtraText || "";
             const messageToSend = response + " " + extraText;
 

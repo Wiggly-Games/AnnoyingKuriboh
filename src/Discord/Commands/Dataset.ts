@@ -5,7 +5,6 @@
 */
 
 import { ApplicationCommandOptionType } from "discord.js";
-import { IUtilities } from "../../Interfaces";
 
 module.exports = {
     Private: true,
@@ -34,12 +33,11 @@ module.exports = {
             }
         ]
 	},
-	async Execute(interaction, utilities: IUtilities) {
+	async Execute(interaction, { Database }) {
         const userId = interaction.user.id;
         const dataSetName = interaction.options.getString("name");
     
-        await utilities.Database.ChangeDataSet(userId, dataSetName);
-    
+        await Database.ChangeDataSet(userId, dataSetName);
         interaction.editReply(`You are now generating responses from the ${dataSetName} data set.`);
 	}
 }

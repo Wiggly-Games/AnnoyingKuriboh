@@ -1,12 +1,16 @@
 import { Colors, Partials } from "discord.js"
 import { Client, GatewayIntentBits, Collection } from 'discord.js';
 import * as Files from "@wiggly-games/files";
+import * as Logs from "@wiggly-games/logs";
 import { ICommand } from "./Interfaces";
 import { Paths, GetDataSet } from "../Helpers";
 import { IUtilities } from "../Interfaces";
 import { Deploy } from "./Deploy";
 import * as CommandsQueue from "./CommandsQueue";
 require("./Extensions");
+
+const LogName = "Discord";
+const ErrorMessage = `I tried to send this to your chat but failed. This is very much not lalala 😿 \nAnyway, {MESSAGE}`;
 
 // Add the commands to discord.js
 // Fetches and loads all commands from the Commands folder.
@@ -43,6 +47,17 @@ export async function DeployCommands(){
   Deploy(commands.filter(command => command.Active !== false).map(command => command.Definition));
 }
 
+// Runs a function, catching errors. Returns a boolean indicating success.
+// Should only be used in catch blocks, so that we don't throw errors within errors.
+async function pcall(f: ()=>Promise<void>): Promise<boolean> {
+  try {
+    await f();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Initializes the Discord bot.
 export async function Initialize(utilities: IUtilities){
     const client = new Client({ intents: 
@@ -74,18 +89,20 @@ export async function Initialize(utilities: IUtilities){
         try {
           await command.Execute(interaction, utilities);
         } catch (error) {
-          console.error(error);
-          if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-          } else {
-            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-          }
+          Logs.WriteError(LogName, error);
+          await pcall(async ()=>{
+            if (interaction.replied || interaction.deferred) {
+              await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+            } else {
+              await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+            }
+          });
         }
       })
     });
 
     // Respond to messages being generated
-    client.on("messageCreate", async function(message) {
+    client.on("messageCreate", async function(message) {      
       const guildId = message.guildId;
       if (guildId === undefined) {
         return;
@@ -115,7 +132,19 @@ export async function Initialize(utilities: IUtilities){
             const dataSet = await utilities.Database.GetDataSet(message.author.id);
             const response = await utilities.Chain.Generate(GetDataSet(dataSet));
             const extraText = trigger.ExtraText || "";
-            message.reply(response + " " + extraText);
+            const messageToSend = response + " " + extraText;
+
+            // Try sending the response, note that this can fail, so we need to catch exceptions
+            try {
+              await message.reply(messageToSend);
+            } catch (error) {
+              Logs.WriteError(LogName, error);
+
+              // Try sending a message to the author .... this can fail too so we should wrap it in a pcall
+              await pcall(async () => {
+                await message.author.send(ErrorMessage.replace("{MESSAGE}", messageToSend));
+              });
+            }
           });
 
           // break out here, so that we don't respond to multiple strings in one message
@@ -125,6 +154,5 @@ export async function Initialize(utilities: IUtilities){
     });
       
     client.login(process.env.DISCORD_TOKEN);
-
     LoadCommands(client);
 }

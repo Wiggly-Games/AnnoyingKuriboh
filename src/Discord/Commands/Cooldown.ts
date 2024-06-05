@@ -5,7 +5,6 @@
 */
 
 import { ApplicationCommandOptionType } from "discord.js";
-import { IUtilities } from "../../Interfaces";
 import { MinCooldown } from "../../Configuration.json"
 
 module.exports = {
@@ -27,11 +26,11 @@ module.exports = {
             }
         ]
 	},
-	async Execute(interaction, utilities: IUtilities) {
+	async Execute(interaction, { Database }) {
         const guildId = interaction.guildId;
         const cooldown = interaction.options.getNumber("seconds");
     
-        await utilities.Database.SetCooldown(guildId, cooldown);
+        await Database.SetCooldown(guildId, cooldown);
         interaction.editReply(`Server cooldown has been updated to ${cooldown} seconds.`)
 	}
 }

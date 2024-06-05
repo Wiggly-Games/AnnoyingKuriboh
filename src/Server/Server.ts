@@ -1,23 +1,24 @@
 import { MarkovChain } from "@wiggly-games/markov-chains";
 import { GetDataSet } from "../Helpers";
-import { IUtilities } from "../Interfaces";
 const express = require("express");
 
 const port = 3000
+let app = undefined;
 
-let chain: MarkovChain;
-let app: any;
+export async function Initialize({ Chain }) {
+    // If we already have a server, exit
+    if (app !== undefined) {
+        return;
+    }
 
-export async function Initialize(utilities: IUtilities) {
+    // Otherwise, set up the server and add the routes
     app = express()
-
     app.get('/', (req, res) => {
         res.send('Hello World!')
     })
     app.get('/generate', async (req, res) => {
-        res.send(await utilities.Chain.Generate(GetDataSet('WeirdAl')))
+        res.send(await Chain.Generate(GetDataSet('WeirdAl')))
     })
-    
     app.listen(port, () => {
         console.log(`Example app listening on port ${port}`)
     })

@@ -1,5 +1,5 @@
-import { IUtilities } from "./IUtilities";
+import { TDependencyInjections } from "../Types/TDependencyInjections";
 
 export interface IChainUser {
-    Initialize(utilities: IUtilities): Promise<void>;
+    Initialize(data: TDependencyInjections): Promise<void>;
 }

@@ -1,66 +1,39 @@
-import { Colors, Partials } from "discord.js"
+import { Partials } from "discord.js"
 import { Client, GatewayIntentBits, Collection } from 'discord.js';
-import * as Files from "@wiggly-games/files";
 import * as Logs from "@wiggly-games/logs";
-import { ICommand } from "./Interfaces";
-import { Paths, GetDataSet } from "../Helpers";
-import { IUtilities } from "../Interfaces";
-import { Deploy } from "./Deploy";
-import * as CommandsQueue from "./CommandsQueue";
+import { CommandsQueue } from "./Classes";
+import { TDependencyInjections } from "../Types";
+import { TEventDependencies } from "./Types";
+import { OnInteraction, OnReady, OnMessage } from "./Events";
+import * as Commands from "./Commands";
+export { Deploy as DeployCommands } from "./Commands"
+
 require("./Extensions");
 
 const LogName = "Discord";
-const ErrorMessage = `I tried to send this to your chat but failed. This is very much not lalala 😿 \nAnyway, {MESSAGE}`;
-
-// Add the commands to discord.js
-// Fetches and loads all commands from the Commands folder.
-async function GetCommands(): Promise<ICommand[]> {
-  const commands = [ ];
-
-  const commandFiles = await Files.GetDescendants(Paths.Commands, file => file.endsWith(".js"));
-  commandFiles.forEach(commandPath => {
-    const command = require(commandPath);
-    
-    if ('Definition' in command && 'Execute' in command) {
-      commands.push(command);
-    } else {
-      console.log(`[WARNING] The command at ${commandPath} is missing a required "Definition" or "Execute" property.`);
-    }
-  });
-
-  return commands;
-}
-
-// Loads in commands from the Commands/Utility directory.
-async function LoadCommands(client: Client){
-  client.commands = new Collection();
-  const commands = await GetCommands();
-
-  commands.forEach(command => {
-    client.commands.set(command.Definition.name, command);
-  })
-}
-
-// Deploys commands to our bot.
-export async function DeployCommands(){
-  const commands = await GetCommands();
-  Deploy(commands.filter(command => command.Active !== false).map(command => command.Definition));
-}
-
-// Runs a function, catching errors. Returns a boolean indicating success.
-// Should only be used in catch blocks, so that we don't throw errors within errors.
-async function pcall(f: ()=>Promise<void>): Promise<boolean> {
-  try {
-    await f();
-    return true;
-  } catch {
-    return false;
-  }
-}
+let _initialized: boolean = false;
 
 // Initializes the Discord bot.
-export async function Initialize(utilities: IUtilities){
-    const client = new Client({ intents: 
+export async function Initialize(dependencies: TDependencyInjections){
+  // If we're already initialized, exit without doing anything
+  if (_initialized) {
+    Logs.WriteWarning(LogName, "Discord bot has already been initialized");
+    return;
+  }
+  _initialized = true;
+
+  // Create the queue for handling commands
+  const commandsQueue = new CommandsQueue();
+
+  // Set up our Event Injections
+  // This takes in all the prior dependencies, but adds in some new ones
+  let injections: TEventDependencies = {} as TEventDependencies;
+  Object.keys(dependencies).forEach(k => injections[k] = dependencies[k]);
+  injections.CommandsQueue = commandsQueue;
+  injections.LogName = LogName;
+
+  // Start up our client
+  const client = new Client({ intents: 
       [GatewayIntentBits.Guilds, 
         GatewayIntentBits.DirectMessages,
         GatewayIntentBits.GuildMessages,
@@ -69,90 +42,14 @@ export async function Initialize(utilities: IUtilities){
       ],
       partials: [Partials.Channel, Partials.Message, Partials.User]
    });
+   injections.Client = client;
 
-    client.on('ready', () => {
-      console.log(`Logged in as ${client.user.tag}!`);
-    });
-    
-    // Respond to Interaction Commands (slash commands)
-    client.on('interactionCreate', async interaction => {
-      if (!interaction.isChatInputCommand()) return;
-      const command = interaction.client.commands.get(interaction.commandName);
-
-      if (!command) {
-        console.error(`No command matching ${interaction.commandName} was found.`);
-        return;
-      }
-    
-		  await interaction.deferReply({ephemeral: command.Private});
-      CommandsQueue.Add(async () => {
-        try {
-          await command.Execute(interaction, utilities);
-        } catch (error) {
-          Logs.WriteError(LogName, error);
-          await pcall(async ()=>{
-            if (interaction.replied || interaction.deferred) {
-              await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-            } else {
-              await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-            }
-          });
-        }
-      })
-    });
-
-    // Respond to messages being generated
-    client.on("messageCreate", async function(message) {      
-      const guildId = message.guildId;
-      if (guildId === undefined) {
-        return;
-      }
-
-      // ignore messages sent from the bot
-      if (message.author.id === client.user.id) {
-        return;
-      }
-
-      // go through all the triggers to see if any of them match
-      const triggers = await utilities.Database.GetTriggerWords(guildId);
-      for (const trigger of triggers) {
-        if (message.content.toLowerCase().includes(trigger.TriggerWord)) {
-          // if we found one, add it to our queue to respond to
-          CommandsQueue.Add(async () => {
-            // Check cooldown
-            const currentTime = new Date().getTime();
-            const lastTime = await utilities.Database.GetCooldown(guildId);
-            
-            if (lastTime.LastMessageTimestamp + lastTime.Cooldown*1000 >= currentTime) {
-              return;
-            }
-            await utilities.Database.SetLastMessageTimestamp(guildId, currentTime);
-
-            // Generate a new message
-            const dataSet = await utilities.Database.GetDataSet(message.author.id);
-            const response = await utilities.Chain.Generate(GetDataSet(dataSet));
-            const extraText = trigger.ExtraText || "";
-            const messageToSend = response + " " + extraText;
-
-            // Try sending the response, note that this can fail, so we need to catch exceptions
-            try {
-              await message.reply(messageToSend);
-            } catch (error) {
-              Logs.WriteError(LogName, error);
-
-              // Try sending a message to the author .... this can fail too so we should wrap it in a pcall
-              await pcall(async () => {
-                await message.author.send(ErrorMessage.replace("{MESSAGE}", messageToSend));
-              });
-            }
-          });
-
-          // break out here, so that we don't respond to multiple strings in one message
-          break;
-        }
-      }
-    });
+   // Listen on events against the client
+   client.on("ready", () => OnReady(injections));
+   client.on("interactionCreate", (interaction) => OnInteraction(interaction, injections));
+   client.on("messageCreate", (message) => OnMessage(message, injections));
       
-    client.login(process.env.DISCORD_TOKEN);
-    LoadCommands(client);
+   // Log in, and load all the commands that should be available on our bot
+   client.login(process.env.DISCORD_TOKEN);
+   Commands.Load(client);
 }

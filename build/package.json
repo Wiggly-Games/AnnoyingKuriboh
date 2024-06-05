@@ -2,12 +2,12 @@
     "name": "@wiggly-games/template",
     "version": "1.0.0",
     "description": "",
-    "main": "src/main.js",
-    "types": "src/main.d.ts",
+    "main": "main.js",
+    "types": "main.d.ts",
     "scripts": {
-      "start": "node src/main.js",
-      "test": "node test.js",
-      "deploy": "node src/deploy.js"
+      "start": "node main.js",
+      "train": "node train.js",
+      "deploy": "node deploy.js"
     },
     "author": "",
     "license": "ISC",

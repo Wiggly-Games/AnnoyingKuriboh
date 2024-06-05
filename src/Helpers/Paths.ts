@@ -1,7 +1,7 @@
 import { CreateDirectory, ROOT } from "@wiggly-games/files";
 
 export const Paths = {
-    Commands: ROOT + "/src/Discord/Commands",
+    Commands: ROOT + "/Discord/Commands",
     Static: ROOT + "/Static",
     Logs: `${ROOT}/Logs`,
     Data: `${ROOT}/Data`,
@@ -17,5 +17,5 @@ export async function Initialize(){
 
 // Returns a data set with the given name.
 export function GetDataSet(name: string) {
-    return `${Paths.Data}\\${name}`;
+    return `${Paths.Data}/${name}`;
 }

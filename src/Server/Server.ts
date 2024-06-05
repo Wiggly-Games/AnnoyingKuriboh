@@ -1,5 +1,5 @@
-import { MarkovChain } from "@wiggly-games/markov-chains";
-import { GetDataSet } from "../Helpers";
+import * as Files from "@wiggly-games/files";
+import { Paths } from "../Helpers";
 const express = require("express");
 
 const port = 3000
@@ -17,7 +17,14 @@ export async function Initialize({ Chain }) {
         res.send('Hello World!')
     })
     app.get('/generate', async (req, res) => {
-        res.send(await Chain.Generate(GetDataSet('WeirdAl')))
+        const filePaths = await Files.GetDescendants(Paths.Data, (x) => x !== Paths.Data && !x.endsWith(".json"));
+        if (filePaths.length === 0) {
+            res.send("Could not find any training data :(")
+            return
+        }
+
+        const path = filePaths[Math.floor(Math.random() * filePaths.length)];
+        res.send(await Chain.Generate(path))
     })
     app.listen(port, () => {
         console.log(`Example app listening on port ${port}`)

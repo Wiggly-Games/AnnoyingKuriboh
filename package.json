@@ -9,6 +9,7 @@
     "start": "cd build && npm start",
     "test": "npm run compile && cd build && npm run test",
     "deploy": "npm run compile && cd build && npm run deploy",
+    "train": "npm run compile && cd build && npm run train",
     "sandbox": "cd build && node",
     "clean": "rmdir /S /Q \"build/Logs/LogFiles\"",
     "zip": "tar.exe -a -c -f build.zip build"
@@ -21,7 +22,7 @@
   },
   "dependencies": {
     "@wiggly-games/data-structures": "^1.0.2",
-    "@wiggly-games/files": "^1.0.3",
+    "@wiggly-games/files": "^1.0.5",
     "@wiggly-games/logs": "^1.0.1",
     "@wiggly-games/markov-chains": "^2.1.3",
     "better-sqlite3": "^11.0.0",

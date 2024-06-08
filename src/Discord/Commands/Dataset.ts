@@ -8,7 +8,7 @@ import { ApplicationCommandOptionType } from "discord.js";
 
 module.exports = {
     Private: true,
-    Active: false,
+    Active: true,
 	Definition: {
 		name: 'dataset',
 		description: 'Changes the data set used to generate responses.',
@@ -28,6 +28,10 @@ module.exports = {
                     {
                         name: "Wiggles",
                         value: "Wiggles"
+                    },
+                    {
+                        name: "Combined",
+                        value: "Combined"
                     }
                 ]
             }

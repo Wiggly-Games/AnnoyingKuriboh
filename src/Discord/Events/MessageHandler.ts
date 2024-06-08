@@ -1,6 +1,9 @@
 /*
     Handles events started from messages.
     This happens whenever a message is sent within a Discord server that the bot has been added to.
+
+
+    NOTE: Error check - Missing permmissions
 */
 
 import { Message } from "discord.js";
@@ -92,14 +95,14 @@ async function RespondToMessage(message: Message, extraText: string | undefined,
     }
 
     // If this is the help request, hardcode the result
-    const { Database, Chain, LogName } = dependencies;
+    const { Database, Chains, LogName } = dependencies;
     let messageToSend: string;
     if (CheckIsHelpMessage(message.content)) {
         messageToSend = HELP_MESSAGE;
     } else {
         // Generate a new message
         const dataSet = await Database.GetDataSet(message.author.id);
-        const response = await Chain.Generate(GetDataSet(dataSet));
+        const response = await Chains.get(dataSet).Generate();
         messageToSend = response + " " + extraText;
     }
 

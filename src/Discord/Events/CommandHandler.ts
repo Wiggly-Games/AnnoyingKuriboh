@@ -20,7 +20,11 @@ export async function OnInteraction(interaction: Interaction, dependencies : TEv
       return;
     }
   
-    await interaction.deferReply({ephemeral: command.Private});
+    try {
+      await interaction.deferReply({ephemeral: command.Private});
+    } catch (e) {
+      return;
+    }
 
     const { CommandsQueue, LogName } = dependencies;
     CommandsQueue.Add(async () => {
@@ -36,5 +40,5 @@ export async function OnInteraction(interaction: Interaction, dependencies : TEv
           }
         });
       }
-    })
+    });
 }

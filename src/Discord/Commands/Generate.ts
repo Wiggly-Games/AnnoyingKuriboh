@@ -1,8 +1,4 @@
-import { ApplicationCommand, CommandInteraction } from "discord.js";
-import { MarkovChain } from "@wiggly-games/markov-chains";
-import { ICommand } from "../Interfaces/IUtilityCommand";
-import { GetDataSet } from "../../Helpers";
-const { SlashCommandBuilder } = require('discord.js');
+import { CommandInteraction } from "discord.js";
 
 module.exports = {
 	Private: false,
@@ -13,9 +9,9 @@ module.exports = {
 		"integration_types": [ 0, 1 ],
 		"contexts": [ 0, 1, 2 ]
 	},
-	async Execute(interaction: CommandInteraction, { Database, Chain }) {
+	async Execute(interaction: CommandInteraction, { Database, Chains }) {
 		const dataset = await Database.GetDataSet(interaction.user.id);
-		const response = await Chain.Generate(GetDataSet(dataset));
+		const response = await Chains.get(dataset).Generate();
 		
 		await interaction.editReply(response);
 	}

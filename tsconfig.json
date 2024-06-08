@@ -4,6 +4,9 @@
       "module": "CommonJS",
       "outDir": "build",
       "resolveJsonModule": true,
-      "sourceMap": true
-    }
+      "sourceMap": false,
+      "declaration": true,
+      "declarationDir": "build/types"
+    },
+    "exclude": ["node_modules", "build"]
   }

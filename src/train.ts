@@ -8,7 +8,7 @@ import { ChainConfiguration, MarkovChain } from "@wiggly-games/markov-chains"
 import * as Files from "@wiggly-games/files"
 import { Paths, Initialize as InitializePaths, GetDataSet } from "./Helpers";
 
-const TRAINING_DATA = "../TrainingData";
+const TRAINING_DATA = "./TrainingData";
 
 async function CreateTrainingSet(path: string, data: string[], settings: ChainConfiguration): Promise<string[]> {
     Files.CreateDirectory(path);
@@ -34,8 +34,8 @@ async function CreateTrainingSet(path: string, data: string[], settings: ChainCo
         Backoff: true,
         MinBackoffLength: 2,
         TrainingLength: 5,
-        MinRequiredOptions: 3,
-        StopAtFewerOptions: true
+        MinRequiredOptions: 2,
+        StopAtFewerOptions: false
     }
 
     for (const file of trainingFiles) {

@@ -24,13 +24,13 @@ const ChainConfig : ChainConfiguration = {
 }
 
 // Creates the MarkovChains map, mapping from the DataSet name -> Chain.
-async function LoadChains(): Promise<Map<string, MarkovChain>> {
+async function LoadChains(): Promise<Map<string, MarkovChain<string>>> {
   const chainNames = await GetChainPaths();
-  const results = new Map<string, MarkovChain>();
+  const results = new Map<string, MarkovChain<string>>();
 
   for (const dataset of chainNames) {
-    const chain = new MarkovChain(GetDataSet(dataset), ChainConfig);
-    await chain.Load();
+    const chain = new MarkovChain<string>(GetDataSet(dataset), ChainConfig);
+    await chain.Load((x) => x);
 
     results.set(dataset, chain);
   }

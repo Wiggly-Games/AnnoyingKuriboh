@@ -103,7 +103,7 @@ async function RespondToMessage(message: Message, extraText: string | undefined,
         // Generate a new message
         const dataSet = await Database.GetDataSet(message.author.id);
         const response = await Chains.get(dataSet).Generate();
-        messageToSend = response + " " + extraText;
+        messageToSend = response.join(" ") + " " + extraText;
     }
 
     // Respond to the message

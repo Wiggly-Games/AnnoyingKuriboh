@@ -25,7 +25,7 @@ export async function Initialize({ Chains }) {
         }
 
         const path = filePaths[Math.floor(Math.random() * filePaths.length)];
-        res.send(await Chains.get(req.params.DataSet).Generate(path))
+        res.send((await Chains.get(req.params.DataSet).Generate(path)).join(" "))
     })
     app.listen(port, () => {
         console.log(`Example app listening on port ${port}`)

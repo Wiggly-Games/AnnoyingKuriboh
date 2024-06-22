@@ -13,6 +13,6 @@ module.exports = {
 		const dataset = await Database.GetDataSet(interaction.user.id);
 		const response = await Chains.get(dataset).Generate();
 		
-		await interaction.editReply(response);
+		await interaction.editReply(response.join(" "));
 	}
 }

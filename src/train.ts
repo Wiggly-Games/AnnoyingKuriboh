@@ -10,12 +10,28 @@ import { Paths, Initialize as InitializePaths, GetDataSet } from "./Helpers";
 
 const TRAINING_DATA = "./TrainingData";
 
+function buildWords(input: string[]): string[][] {
+    const trainingData: string[][] = [];
+
+    input.forEach(line => {
+        let sentences = line.replace(/([.?!])\s*(?=[A-Z])/g, "$1|").split(/[\|\n]/).map(x => x.trim()).filter(x => x !== "");
+        sentences.forEach(sentence => {
+            let words = sentence.split(" ").filter(x => x !== "");
+            trainingData.push(words);
+        });
+    });
+
+    return trainingData;
+}
+
 async function CreateTrainingSet(path: string, data: string[], settings: ChainConfiguration): Promise<string[]> {
     Files.CreateDirectory(path);
 
-    let chain = new MarkovChain(path, settings);
-    await chain.Train(data.join("\n"));
-    await chain.Save();
+    let chain = new MarkovChain<string>(path, settings);
+
+    const trainingSet = buildWords(data);
+    await chain.Train(trainingSet);
+    await chain.Save((x) => x);
 
     console.log(`Finished training ${path}`);
 

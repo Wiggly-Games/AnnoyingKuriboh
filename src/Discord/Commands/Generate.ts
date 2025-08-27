@@ -1,4 +1,4 @@
-import { CommandInteraction } from "discord.js";
+import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
 
 module.exports = {
 	Private: false,
@@ -7,11 +7,20 @@ module.exports = {
 		name: 'generate',
 		description: 'Generates a new message.',
 		"integration_types": [ 0, 1 ],
-		"contexts": [ 0, 1, 2 ]
+		"contexts": [ 0, 1, 2 ],
+		"options": [
+			{
+				type: ApplicationCommandOptionType.String,
+				name: "phrase",
+				description: "Optional starting phrase to use.",
+				required: false
+			}
+		]
 	},
-	async Execute(interaction: CommandInteraction, { Database, Chains }) {
+	async Execute(interaction, { Database, Chains }) {
 		const dataset = await Database.GetDataSet(interaction.user.id);
-		const response = await Chains.get(dataset).Generate();
+        const phrase = interaction.options.getString("phrase");
+		const response = await Chains.get(dataset).Generate(phrase);
 		
 		await interaction.editReply(response.join(" "));
 	}

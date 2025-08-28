@@ -20,7 +20,9 @@ module.exports = {
 	async Execute(interaction, { Database, Chains }) {
 		const dataset = await Database.GetDataSet(interaction.user.id);
         const phrase = interaction.options.getString("phrase");
-		const response = await Chains.get(dataset).Generate(phrase);
+
+		const data = phrase === null ? [ ] : phrase.split(" ");
+		const response = await Chains.get(dataset).Generate(data);
 		
 		await interaction.editReply(response.join(" "));
 	}
